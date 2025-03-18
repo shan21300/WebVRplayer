@@ -2,16 +2,38 @@
 <html>
   <head>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/osc/dist/osc-browser.min.js"></script>
   </head>
   <body>
     <a-scene>
       <a-assets>
         <video id="video360" loop crossorigin="anonymous" webkit-playsinline playsinline>
-          <source src="Holy Communion 360.mp4" type="video/mp4">
+          <source src="https://drive.google.com/uc?export=download&id=16sLG5K5VHi0PxxhA0KII9FT7qPvahdPL" type="video/mp4">
         </video>
       </a-assets>
 
-      <a-videosphere src="#video360"></a-videosphere>
+      <a-videosphere id="video-sphere" src="#video360"></a-videosphere>
     </a-scene>
+
+    <script>
+      const video = document.querySelector('#video360');
+
+      // Connect OSC WebSocket
+      const oscPort = new osc.WebSocketPort({
+        url: "ws://localhost:8081" // WebSocket server for OSC messages
+      });
+
+      oscPort.on("message", (oscMsg) => {
+        if (oscMsg.address === "/play") {
+          video.play();
+        } else if (oscMsg.address === "/pause") {
+          video.pause();
+        } else if (oscMsg.address === "/seek") {
+          video.currentTime = oscMsg.args[0]; // Seek to a specific timestamp
+        }
+      });
+
+      oscPort.open();
+    </script>
   </body>
 </html>
